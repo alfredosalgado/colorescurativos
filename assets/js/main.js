@@ -205,7 +205,7 @@ class TherapyCarousel {
         this.stopAutoPlay();
         this.autoPlayInterval = setInterval(() => {
             this.nextSlide();
-        }, this.isMobile ? 3000 : 4000); // Más rápido en móvil
+        }, this.isMobile ? 10000 : 10000); // Tiempo más lento para mejor lectura
     }
     
     stopAutoPlay() {
@@ -218,6 +218,125 @@ class TherapyCarousel {
     
     // Inicializar carrusel
     new TherapyCarousel();
+    
+    // Testimonios Carousel Class
+class TestimoniosCarousel {
+    constructor() {
+        this.carousel = document.querySelector('.testimonios-carousel');
+        if (!this.carousel) return;
+        
+        this.track = this.carousel.querySelector('.testimonios-track');
+        this.cards = this.carousel.querySelectorAll('.testimonio-card');
+        this.prevBtn = this.carousel.querySelector('.testimonios-btn-prev');
+        this.nextBtn = this.carousel.querySelector('.testimonios-btn-next');
+        this.indicators = this.carousel.querySelectorAll('.testimonios-indicator');
+        
+        this.currentIndex = 0;
+        this.totalCards = this.cards.length;
+        this.autoPlayInterval = null;
+        
+        this.init();
+    }
+    
+    init() {
+        this.setupEventListeners();
+        this.startAutoPlay();
+        this.setupTouchEvents();
+    }
+    
+    setupEventListeners() {
+        this.prevBtn.addEventListener('click', () => this.prevSlide());
+        this.nextBtn.addEventListener('click', () => this.nextSlide());
+        
+        this.indicators.forEach((indicator, index) => {
+            indicator.addEventListener('click', () => this.goToSlide(index));
+        });
+        
+        // Pause auto-play on hover
+        this.carousel.addEventListener('mouseenter', () => this.stopAutoPlay());
+        this.carousel.addEventListener('mouseleave', () => this.startAutoPlay());
+    }
+    
+    setupTouchEvents() {
+        let startX = 0;
+        let currentX = 0;
+        let isDragging = false;
+        
+        this.track.addEventListener('touchstart', (e) => {
+            startX = e.touches[0].clientX;
+            isDragging = true;
+            this.stopAutoPlay();
+        });
+        
+        this.track.addEventListener('touchmove', (e) => {
+            if (!isDragging) return;
+            currentX = e.touches[0].clientX;
+        });
+        
+        this.track.addEventListener('touchend', () => {
+            if (!isDragging) return;
+            
+            const diffX = startX - currentX;
+            const threshold = 50;
+            
+            if (Math.abs(diffX) > threshold) {
+                if (diffX > 0) {
+                    this.nextSlide();
+                } else {
+                    this.prevSlide();
+                }
+            }
+            
+            isDragging = false;
+            this.startAutoPlay();
+        });
+    }
+    
+    updateCarousel() {
+        const translateX = -this.currentIndex * 100;
+        this.track.style.transform = `translateX(${translateX}%)`;
+        
+        // Update indicators
+        this.indicators.forEach((indicator, index) => {
+            indicator.classList.toggle('active', index === this.currentIndex);
+        });
+    }
+    
+    nextSlide() {
+        this.currentIndex = (this.currentIndex + 1) % this.totalCards;
+        this.updateCarousel();
+    }
+    
+    prevSlide() {
+        this.currentIndex = (this.currentIndex - 1 + this.totalCards) % this.totalCards;
+        this.updateCarousel();
+    }
+    
+    goToSlide(index) {
+        this.currentIndex = index;
+        this.updateCarousel();
+    }
+    
+    startAutoPlay() {
+        this.stopAutoPlay();
+        const isMobile = window.innerWidth <= 768;
+        const interval = isMobile ? 5000 : 6000;
+        
+        this.autoPlayInterval = setInterval(() => {
+            this.nextSlide();
+        }, interval);
+    }
+    
+    stopAutoPlay() {
+        if (this.autoPlayInterval) {
+            clearInterval(this.autoPlayInterval);
+            this.autoPlayInterval = null;
+        }
+    }
+}
+    
+    // Inicializar carrusel de testimonios
+    new TestimoniosCarousel();
     
     // Smooth scrolling para los enlaces del navbar
     const navLinks = document.querySelectorAll('.nav-link');
